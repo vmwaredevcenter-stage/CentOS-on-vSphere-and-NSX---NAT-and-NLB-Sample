@@ -1,0 +1,170 @@
+id: CentOSonvSphereUseCase2
+name: CentOS on vSphere & NSX - NAT - UC3
+description: Use to provision a CentOS Virtual Machine connected to a on-demand NAT'd Network and a on-demand load-balancer
+status: PUBLISHED
+properties:
+  __nsx.edge_reservation_policy:
+    fixed: NSX Reservation Policy
+    secured: false
+    visible: false
+  __nsx.management_endpoint_name:
+    fixed: vCenter
+    secured: false
+    visible: false
+  __nsx.transport_zone_name:
+    fixed: VMwarelab-Transport-Zone
+    secured: false
+    visible: false
+  _archiveDays: 15
+  _leaseDays:
+    default: 7
+    max: 15
+    min: 7
+components:
+  External:
+    type: Infrastructure.Network.Network.Existing
+    data:
+      name:
+        fixed: External
+      network_profile:
+        fixed: External
+  NSXVMwareLabWorkload:
+    type: Infrastructure.Network.SecurityTag.NSX.Existing
+    data:
+      endpoint:
+        fixed: vCenter
+      name:
+        fixed: NSX VMwareLab Workload
+  NSXWEBNAT:
+    type: Infrastructure.Network.Network.NSX.OnDemand.NAT
+    data:
+      description:
+        fixed: 10.10.10.0
+      dns:
+        fixed:
+          dns_search_suffix: vmwarelab.local
+          dns_suffix: vmwarelab.local
+          primary_dns: 192.168.0.10
+      gateway:
+        fixed: 10.10.10.1
+      ip_ranges:
+        fixed:
+        - description: ''
+          end_ip: 10.10.10.20
+          id: fc8560cf-310c-4026-b1d1-13aa287c9f38
+          name: NSXWEBNATRange
+          start_ip: 10.10.10.10
+      name:
+        fixed: NSXWEBNAT
+      parent_network_profile:
+        fixed: NSXWEBNAT
+      subnet_mask:
+        fixed: 255.255.255.0
+  SG_Web:
+    type: Infrastructure.Network.SecurityGroup.NSX.Existing
+    data:
+      endpoint:
+        fixed: vCenter
+      name:
+        fixed: SG_Web
+  SSH_LB:
+    type: Infrastructure.Network.LoadBalancer.NSX.OnDemand
+    data:
+      name:
+        fixed: SSH_LB
+      services:
+        fixed:
+        - health_check_interval: 5
+          health_threshold: 5
+          id: TCP
+          name: TCP
+          port: 22
+          response_timeout: 5
+          service_URI: ''
+          unhealth_threshold: 10
+      tier:
+        fixed: ${_resource~WEB}
+      tier_nic_index:
+        fixed: 0
+      vip_network:
+        fixed: ${_resource~External}
+  WEB:
+    type: Infrastructure.CatalogItem.Machine.Virtual.vSphere
+    data:
+      _cluster:
+        default: 1
+        max: 2
+        min: 1
+      action:
+        fixed: LinkedClone
+      allow_storage_policies:
+        fixed: true
+      blueprint_type:
+        fixed: '1'
+      cpu:
+        default: 1
+        max: 2
+        min: 1
+      disks:
+      - capacity: 40
+        custom_properties: null
+        id: 1452637098652
+        initial_location: ''
+        is_clone: true
+        label: Hard disk 1
+        storage_reservation_policy: Cloud Synology Storage Reservation Policy
+        userCreated: false
+        volumeId: 0
+      display_location:
+        fixed: false
+      guest_customization_specification: CentOS65
+      machine_prefix:
+        fixed:
+          id: vRA-VM-
+      max_network_adapters: {}
+      max_volumes: {}
+      memory:
+        default: 512
+        max: 1024
+        min: 512
+      nics:
+      - address: ''
+        assignment_type: Static
+        id: 0
+        load_balancing: TCP
+        network: ${_resource~NSXWEBNAT}
+        network_profile: NSXWEBNAT
+      provisioning_workflow:
+        fixed:
+          id: CloneWorkflow
+          label: CloneWorkflow
+      reservation_policy:
+        id: vSphere Reservation Policy
+        label: vSphere Reservation Policy
+      security_groups:
+      - ${_resource~SG_Web}
+      security_tags:
+      - ${_resource~NSXVMwareLabWorkload}
+      source_machine:
+        fixed:
+          id: 3f8e1d9a-45d7-4676-8ca0-224cd478c780
+          label: CentOS6.5_64
+      source_machine_external_snapshot:
+        fixed: 15
+      source_machine_name:
+        fixed: CentOS6.5_64
+      source_machine_vmsnapshot:
+        fixed:
+          id: '1'
+      storage:
+        fixed: 40
+        min: 40
+    propertyGroups:
+    - LinuxCustomization
+layout:
+  External: 0,0
+  NSXVMwareLabWorkload: 2,1
+  NSXWEBNAT: 3,0
+  SG_Web: 1,2
+  SSH_LB: 2,3
+  WEB: 2,2

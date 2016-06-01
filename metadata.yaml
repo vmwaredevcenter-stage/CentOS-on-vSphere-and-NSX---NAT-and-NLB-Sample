@@ -1,0 +1,7 @@
+name: "auto-generated-pkg-95da52cb-3c25-4575-bead-0cddd8029054"
+productVersion: "7.0.0-SNAPSHOT"
+data:
+- locator: "composite-blueprint/CentOSonvSphereUseCase2.yaml"
+  name: "CentOS on vSphere & NSX - NAT - UC3"
+  description: "CentOS on vSphere & NSX - NAT - UC3"
+exportTime: "2016-01-13T13:55:26.900Z"
